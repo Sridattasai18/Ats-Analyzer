@@ -89,13 +89,28 @@ Navigate to: **`http://127.0.0.1:5000`**
 ```
 Ats-Analyzer/
 ├── main.py              # Flask backend with Gemini integration
-├── requirements.txt     # Python dependencies
+├── requirements.txt     # Python dependencies (incl. gunicorn)
+├── Procfile             # Render/Heroku start command
+├── render.yaml          # Render deployment config
 ├── .env                 # API key (not committed)
 ├── .gitignore
 ├── uploads/             # Temporary PDF storage
 └── templates/
     └── index.html       # Industrial terminal-style UI
 ```
+
+---
+
+## 🚀 Deploy to Render
+
+1. Push your code to GitHub
+2. Go to [render.com](https://render.com) and create a new **Web Service**
+3. Connect your GitHub repo
+4. Render will auto-detect `render.yaml` or use these settings:
+   - **Build Command:** `pip install -r requirements.txt`
+   - **Start Command:** `gunicorn main:app`
+5. Add environment variable: `GEMINI_API_KEY` = your API key
+6. Deploy!
 
 ---
 

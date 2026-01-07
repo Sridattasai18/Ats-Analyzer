@@ -1,5 +1,6 @@
 import os
 import json
+import time
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify, render_template
 from google import genai
@@ -65,7 +66,7 @@ def extract_text_from_pdf(pdf_path):
     return extracted_text.strip()
 
 
-import time
+# Retry logic uses 'time' module imported at top
 
 def gemini_json(prompt, max_retries=3):
     """Call Gemini API with automatic retry on overload/rate-limit errors."""
@@ -202,22 +203,24 @@ def analyze():
         pdf_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
         resume_file.save(pdf_path)
 
-        resume_text = extract_text_from_pdf(pdf_path)
-        if not resume_text:
-            return jsonify({"error": "Could not extract text from PDF"}), 400
+        try:
+            resume_text = extract_text_from_pdf(pdf_path)
+            if not resume_text:
+                return jsonify({"error": "Could not extract text from PDF"}), 400
 
-        parsed_resume = parse_resume(resume_text)
-        parsed_jd = parse_job_description(jd_text)
-        ats_result = ats_match(parsed_resume, parsed_jd)
+            parsed_resume = parse_resume(resume_text)
+            parsed_jd = parse_job_description(jd_text)
+            ats_result = ats_match(parsed_resume, parsed_jd)
 
-        # Optional cleanup
-        os.remove(pdf_path)
-
-        return jsonify({
-            "parsed_resume": parsed_resume,
-            "parsed_job_description": parsed_jd,
-            "ats_result": ats_result
-        })
+            return jsonify({
+                "parsed_resume": parsed_resume,
+                "parsed_job_description": parsed_jd,
+                "ats_result": ats_result
+            })
+        finally:
+            # Always cleanup uploaded file
+            if os.path.exists(pdf_path):
+                os.remove(pdf_path)
 
     except Exception as e:
         # Specific handling for Gemini quota exhaustion
