@@ -257,5 +257,7 @@ def handle_exception(e):
 # ==============================
 # ENTRY POINT
 # ==============================
+# For Vercel serverless, the 'app' variable is used directly
+# For local development, run with: python main.py
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, host="0.0.0.0", port=5000)
