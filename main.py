@@ -154,26 +154,136 @@ Job Description:
     return gemini_json(prompt)
 
 
-def ats_match(parsed_resume, parsed_jd):
+def resume_ats_audit(resume_text):
+    """Standalone ATS audit of resume quality - independent of job description."""
     prompt = f"""
-You are a professional Applicant Tracking System (ATS).
+You are an expert ATS (Applicant Tracking System) auditor.
 
-Return ONLY valid JSON.
+Analyze this resume for ATS COMPATIBILITY issues. This is NOT about job matching - this is about whether the resume will PARSE CORRECTLY through ATS software.
 
-Schema:
+## AUDIT CRITERIA (100 points total):
+
+### 1. FORMAT & STRUCTURE (30 points)
+- Clean section headers (Experience, Education, Skills, etc.): 0-10
+- Consistent date formatting: 0-5
+- No tables, columns, or complex layouts that break ATS: 0-10
+- Standard fonts/no graphics mentioned: 0-5
+
+### 2. CONTACT INFORMATION (15 points)
+- Full name present: 0-5
+- Email present: 0-5
+- Phone present: 0-3
+- LinkedIn/Portfolio (bonus): 0-2
+
+### 3. CONTENT QUALITY (30 points)
+- Action verbs used: 0-10
+- Quantifiable achievements: 0-10
+- Keyword density (industry terms): 0-10
+
+### 4. SECTION COMPLETENESS (25 points)
+- Work experience section: 0-10
+- Education section: 0-5
+- Skills section: 0-5
+- Summary/objective: 0-5
+
+## IMPORTANT:
+- Be STRICT. Point out every flaw.
+- Common issues: missing sections, vague descriptions, no metrics, poor formatting
+
+Return ONLY valid JSON:
 {{
-  "match_percentage": 0,
-  "matching_skills": [],
-  "missing_skills": [],
-  "strengths": [],
-  "improvement_suggestions": []
+  "ats_compatibility_score": <0-100>,
+  "audit_breakdown": {{
+    "format_structure": <0-30>,
+    "contact_info": <0-15>,
+    "content_quality": <0-30>,
+    "section_completeness": <0-25>
+  }},
+  "detected_sections": ["section1", "section2", ...],
+  "missing_sections": ["section1", ...],
+  "formatting_issues": ["issue1", "issue2", ...],
+  "content_issues": ["issue1", "issue2", ...],
+  "strengths": ["strength1", ...],
+  "critical_flaws": ["flaw1", "flaw2", ...],
+  "recommendations": ["specific fix 1", "specific fix 2", ...],
+  "ats_parse_risk": "<LOW | MEDIUM | HIGH>"
 }}
 
-Resume:
+## RESUME TO AUDIT:
+\"\"\"{resume_text}\"\"\"
+
+Perform thorough audit and return JSON.
+"""
+    return gemini_json(prompt)
+
+
+def ats_match(parsed_resume, parsed_jd):
+    prompt = f"""
+You are a professional Applicant Tracking System (ATS) used by Fortune 500 companies.
+
+Your task is to score a resume against a job description using STRICT ATS criteria.
+
+## SCORING METHODOLOGY (100 points total):
+
+### 1. KEYWORD MATCH (40 points)
+- Count exact keyword matches between resume and job description
+- Include: technical skills, tools, certifications, industry terms
+- Score = (matched keywords / total required keywords) × 40
+
+### 2. SKILLS ALIGNMENT (25 points)  
+- Required skills present: +5 points each (max 15)
+- Preferred/bonus skills present: +2 points each (max 10)
+- Deduct 3 points for each CRITICAL missing skill
+
+### 3. EXPERIENCE RELEVANCE (20 points)
+- Relevant job titles/roles: 0-8 points
+- Years of experience alignment: 0-6 points
+- Industry experience match: 0-6 points
+
+### 4. QUALIFICATIONS MATCH (15 points)
+- Education level match: 0-8 points
+- Certifications match: 0-7 points
+
+## IMPORTANT RULES:
+- Be STRICT. Real ATS systems reject 75% of resumes.
+- A score of 70+ is considered a GOOD match.
+- A score below 50 means the resume needs significant work.
+- Do NOT inflate scores to be nice.
+
+Return ONLY valid JSON with this exact schema:
+{{
+  "match_percentage": <0-100 integer based on above methodology>,
+  "score_breakdown": {{
+    "keyword_match": <0-40>,
+    "skills_alignment": <0-25>,
+    "experience_relevance": <0-20>,
+    "qualifications_match": <0-15>
+  }},
+  "matching_skills": ["skill1", "skill2", ...],
+  "missing_skills": ["critical_skill1", "critical_skill2", ...],
+  "keyword_analysis": {{
+    "found": ["keyword1", "keyword2", ...],
+    "missing": ["keyword1", "keyword2", ...]
+  }},
+  "strengths": ["strength1", "strength2", ...],
+  "weaknesses": ["weakness1", "weakness2", ...],
+  "improvement_suggestions": [
+    "Specific actionable suggestion 1",
+    "Specific actionable suggestion 2",
+    ...
+  ],
+  "ats_verdict": "<STRONG MATCH | GOOD MATCH | NEEDS IMPROVEMENT | POOR MATCH>"
+}}
+
+## INPUT DATA:
+
+### RESUME:
 {json.dumps(parsed_resume, indent=2)}
 
-Job Description:
+### JOB DESCRIPTION:
 {json.dumps(parsed_jd, indent=2)}
+
+Analyze thoroughly and return the JSON score.
 """
     return gemini_json(prompt)
 
@@ -208,14 +318,22 @@ def analyze():
             if not resume_text:
                 return jsonify({"error": "Could not extract text from PDF"}), 400
 
+            # Parse resume and job description
             parsed_resume = parse_resume(resume_text)
             parsed_jd = parse_job_description(jd_text)
+            
+            # Two separate analyses:
+            # 1. Resume ATS Audit (standalone quality check)
+            resume_audit = resume_ats_audit(resume_text)
+            
+            # 2. Resume vs Job Description Match
             ats_result = ats_match(parsed_resume, parsed_jd)
 
             return jsonify({
                 "parsed_resume": parsed_resume,
                 "parsed_job_description": parsed_jd,
-                "ats_result": ats_result
+                "resume_audit": resume_audit,  # Standalone ATS quality
+                "ats_result": ats_result        # Job match analysis
             })
         finally:
             # Always cleanup uploaded file

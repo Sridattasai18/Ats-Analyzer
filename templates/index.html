@@ -20,7 +20,7 @@
       --panel: #0a0a0f;
       --panel-light: #121216;
       --grid-line: #1a1a1a;
-      
+
       /* FOREGROUND */
       --fg-primary: #e0e0e0;
       --fg-secondary: #808080;
@@ -29,17 +29,19 @@
       /* IDENTITY: HAZARD ORANGE */
       --accent: #ff5500;
       --accent-dim: rgba(255, 85, 0, 0.15);
-      
+
       /* UTILITY */
-      --success: #00ff41; /* Terminal Green */
+      --success: #00ff41;
+      /* Terminal Green */
       --warning: #ffcc00;
       --error: #ff003c;
-      
+
       /* DIMENSIONS */
       --border-thick: 2px;
       --border-thin: 1px;
-      --radius: 0px; /* BRUTALIST RULE: NO ROUNDED CORNERS */
-      
+      --radius: 0px;
+      /* BRUTALIST RULE: NO ROUNDED CORNERS */
+
       /* FONT */
       --mono: 'JetBrains Mono', monospace;
     }
@@ -60,7 +62,7 @@
       background-image: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
       background-size: 100% 2px, 3px 100%;
     }
-    
+
     /* Selection is inverted */
     ::selection {
       background: var(--accent);
@@ -120,7 +122,7 @@
       letter-spacing: -1px;
       line-height: 1;
     }
-    
+
     h1 span {
       color: var(--fg-dark);
     }
@@ -140,21 +142,26 @@
       padding: 24px;
       position: relative;
     }
-    
+
     /* Decoration: Corner Brackets */
     .card::before {
       content: '';
       position: absolute;
-      top: -2px; left: -2px;
-      width: 10px; height: 10px;
+      top: -2px;
+      left: -2px;
+      width: 10px;
+      height: 10px;
       border-top: 2px solid var(--accent);
       border-left: 2px solid var(--accent);
     }
+
     .card::after {
       content: '';
       position: absolute;
-      bottom: -2px; right: -2px;
-      width: 10px; height: 10px;
+      bottom: -2px;
+      right: -2px;
+      width: 10px;
+      height: 10px;
       border-bottom: 2px solid var(--accent);
       border-right: 2px solid var(--accent);
     }
@@ -170,6 +177,7 @@
       align-items: center;
       gap: 8px;
     }
+
     .section-title::before {
       content: '//';
       color: var(--fg-dark);
@@ -212,9 +220,14 @@
       padding: 8px;
       display: none;
     }
-    .file-name.show { display: block; }
 
-    input[type="file"] { display: none; }
+    .file-name.show {
+      display: block;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
 
     label {
       display: block;
@@ -304,9 +317,19 @@
       filter: grayscale(1);
     }
 
-    #formStatus { margin-top: 16px; height: 24px; font-size: 0.8rem; }
-    .status-error { color: var(--error); }
-    .status-success { color: var(--success); }
+    #formStatus {
+      margin-top: 16px;
+      height: 24px;
+      font-size: 0.8rem;
+    }
+
+    .status-error {
+      color: var(--error);
+    }
+
+    .status-success {
+      color: var(--success);
+    }
 
     /* RESULTS GRID */
     .results {
@@ -327,14 +350,16 @@
       width: 140px;
       height: 140px;
       border: 2px solid var(--fg-dark);
-      border-radius: 50%; /* Keeping circle but making it stripped */
+      border-radius: 50%;
+      /* Keeping circle but making it stripped */
       display: flex;
       align-items: center;
       justify-content: center;
       position: relative;
-      background: conic-gradient(from 0deg, var(--accent) 0%, transparent 0%); /* JS will update */
+      background: conic-gradient(from 0deg, var(--accent) 0%, transparent 0%);
+      /* JS will update */
     }
-    
+
     /* Inner cutout for ring effect */
     .score-display::before {
       content: '';
@@ -344,7 +369,7 @@
       border-radius: 50%;
       z-index: 1;
     }
-    
+
     .score-value-wrap {
       position: relative;
       z-index: 2;
@@ -357,7 +382,7 @@
       font-weight: 800;
       color: var(--fg-primary);
     }
-    
+
     .score-label {
       font-size: 0.6rem;
       text-transform: uppercase;
@@ -372,9 +397,9 @@
     }
 
     .score-description {
-       font-size: 0.85rem;
-       color: var(--fg-secondary);
-       margin-bottom: 16px;
+      font-size: 0.85rem;
+      color: var(--fg-secondary);
+      margin-bottom: 16px;
     }
 
     /* Progress Bar custom */
@@ -385,16 +410,14 @@
       position: relative;
       margin-bottom: 8px;
     }
-    
+
     .bar-fill {
       height: 100%;
-      background: repeating-linear-gradient(
-        45deg,
-        var(--accent),
-        var(--accent) 5px,
-        var(--void) 5px,
-        var(--void) 10px
-      );
+      background: repeating-linear-gradient(45deg,
+          var(--accent),
+          var(--accent) 5px,
+          var(--void) 5px,
+          var(--void) 10px);
       width: 0%;
       transition: width 0.5s steps(10);
     }
@@ -419,21 +442,22 @@
     .insight-card {
       min-height: 200px;
     }
-    
+
     .insight-header {
       display: flex;
       justify-content: space-between;
-      border-bottom: 1px solid var(--fg-dark); /* Separator */
+      border-bottom: 1px solid var(--fg-dark);
+      /* Separator */
       padding-bottom: 8px;
       margin-bottom: 16px;
     }
-    
+
     .insight-title {
       font-size: 0.8rem;
       text-transform: uppercase;
       font-weight: 700;
     }
-    
+
     .insight-count {
       font-size: 0.8rem;
       color: var(--fg-secondary);
@@ -453,13 +477,13 @@
       border: 1px solid var(--fg-dark);
       text-transform: uppercase;
     }
-    
+
     .tag.matching {
       border-color: var(--success);
       color: var(--success);
       background: rgba(0, 255, 65, 0.05);
     }
-    
+
     .tag.missing {
       border-color: var(--error);
       color: var(--error);
@@ -480,7 +504,7 @@
       line-height: 1.5;
       color: var(--fg-primary);
     }
-    
+
     .suggestions-list li::before {
       content: '>';
       position: absolute;
@@ -503,7 +527,7 @@
       align-items: center;
       padding-bottom: 4px;
     }
-    
+
     .raw-analysis {
       background: var(--void);
       border: 1px solid var(--fg-dark);
@@ -514,11 +538,14 @@
       font-size: 0.75rem;
       color: var(--fg-secondary);
     }
-    
+
     .collapsible-content {
       display: none;
     }
-    .collapsible.open .collapsible-content { display: block; }
+
+    .collapsible.open .collapsible-content {
+      display: block;
+    }
 
     /* LOADING OVERLAY: TERMINAL BOOT */
     .overlay {
@@ -531,7 +558,10 @@
       justify-content: center;
       flex-direction: column;
     }
-    .overlay.show { display: flex; }
+
+    .overlay.show {
+      display: flex;
+    }
 
     .loader-text {
       font-size: 1.5rem;
@@ -541,7 +571,7 @@
       color: var(--accent);
       animation: blink 0.5s step-end infinite alternate;
     }
-    
+
     .progress-bar-loader {
       width: 300px;
       height: 4px;
@@ -549,33 +579,62 @@
       position: relative;
       overflow: hidden;
     }
-    
+
     .progress-bar-loader::after {
       content: '';
       position: absolute;
-      top: 0; left: 0; bottom: 0;
+      top: 0;
+      left: 0;
+      bottom: 0;
       width: 50%;
       background: var(--accent);
       animation: loadscan 1s linear infinite;
     }
 
     @keyframes loadscan {
-      0% { left: -50%; }
-      100% { left: 100%; }
+      0% {
+        left: -50%;
+      }
+
+      100% {
+        left: 100%;
+      }
     }
 
     @keyframes blink {
-      0% { opacity: 1; }
-      100% { opacity: 0; }
+      0% {
+        opacity: 1;
+      }
+
+      100% {
+        opacity: 0;
+      }
     }
 
     /* Responsive */
     @media (max-width: 900px) {
-      .container { grid-template-columns: 1fr; }
-      .insights-subgrid { grid-template-columns: 1fr; }
-      .score-card { grid-template-columns: 1fr; gap: 16px; text-align: center; }
-      .score-display { margin: 0 auto; }
-      .match-badge-box { width: 100%; text-align: center; }
+      .container {
+        grid-template-columns: 1fr;
+      }
+
+      .insights-subgrid {
+        grid-template-columns: 1fr;
+      }
+
+      .score-card {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        text-align: center;
+      }
+
+      .score-display {
+        margin: 0 auto;
+      }
+
+      .match-badge-box {
+        width: 100%;
+        text-align: center;
+      }
     }
   </style>
 </head>
@@ -594,23 +653,25 @@
     </header>
 
     <div class="container">
-      
+
       <!-- INPUT PANEL -->
       <section class="card">
         <h2 class="section-title">INPUT_DATA_STREAM</h2>
         <form id="uploadForm" enctype="multipart/form-data" method="post" novalidate>
-          
+
           <div class="file-upload-area" id="dropZone">
-             <div style="font-size:2rem; margin-bottom:8px;">↓</div>
-             <div class="upload-text">Drop PDF Resume</div>
-             <div class="upload-hint" style="font-size:0.7rem; color:var(--fg-secondary); margin-top:4px;">MAX SIZE 5MB</div>
-             <input type="file" id="resume" name="resume" accept="application/pdf" />
+            <div style="font-size:2rem; margin-bottom:8px;">↓</div>
+            <div class="upload-text">Drop PDF Resume</div>
+            <div class="upload-hint" style="font-size:0.7rem; color:var(--fg-secondary); margin-top:4px;">MAX SIZE 5MB
+            </div>
+            <input type="file" id="resume" name="resume" accept="application/pdf" />
           </div>
           <div class="file-name" id="fileName"></div>
 
           <div style="margin-top:24px;">
             <label for="job_description">TARGET_PARAMETERS (JOB DESC)</label>
-            <textarea id="job_description" name="job_description" placeholder="> PASTE JOB REQUIREMENTS HERE..."></textarea>
+            <textarea id="job_description" name="job_description"
+              placeholder="> PASTE JOB REQUIREMENTS HERE..."></textarea>
           </div>
 
           <div class="btn-row">
@@ -627,7 +688,7 @@
 
       <!-- RESULTS PANEL -->
       <section class="results">
-        
+
         <!-- MAIN SCORE -->
         <div class="card score-card" id="scoreCard">
           <div class="score-display" id="scoreDisplayCircle">
@@ -637,17 +698,105 @@
             </div>
           </div>
           <div class="score-details">
-             <h3>COMPATIBILITY_INDEX</h3>
-             <div id="matchBadge" class="match-badge-box" style="border-style:dashed;">WAITING FOR INPUT</div>
-             <p class="score-description" id="scoreDescription">Awaiting resume data stream for calculation...</p>
-             
-             <!-- Custom Bar -->
-             <div class="bar-frame">
-               <div class="bar-fill" id="scoreBar"></div>
-             </div>
-             <div style="display:flex; justify-content:space-between; font-size:0.6rem; color:var(--fg-secondary);">
-               <span>0</span><span>100</span>
-             </div>
+            <h3>COMPATIBILITY_INDEX</h3>
+            <div id="matchBadge" class="match-badge-box" style="border-style:dashed;">WAITING FOR INPUT</div>
+            <div id="atsVerdict" style="margin-top:8px; font-size:0.7rem; color:var(--fg-secondary);"></div>
+            <p class="score-description" id="scoreDescription">Awaiting resume data stream for calculation...</p>
+
+            <!-- Custom Bar -->
+            <div class="bar-frame">
+              <div class="bar-fill" id="scoreBar"></div>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:0.6rem; color:var(--fg-secondary);">
+              <span>0</span><span>100</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SCORE BREAKDOWN -->
+        <div class="card" id="breakdownCard" style="display:none;">
+          <div class="insight-header">
+            <span class="insight-title">// SCORE_BREAKDOWN</span>
+          </div>
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:12px;">
+            <div class="breakdown-item">
+              <div style="display:flex; justify-content:space-between; font-size:0.75rem; margin-bottom:4px;">
+                <span>KEYWORDS</span>
+                <span id="breakdownKeywords">0/40</span>
+              </div>
+              <div class="bar-frame" style="height:8px;">
+                <div class="bar-fill" id="barKeywords" style="background:var(--accent);"></div>
+              </div>
+            </div>
+            <div class="breakdown-item">
+              <div style="display:flex; justify-content:space-between; font-size:0.75rem; margin-bottom:4px;">
+                <span>SKILLS</span>
+                <span id="breakdownSkills">0/25</span>
+              </div>
+              <div class="bar-frame" style="height:8px;">
+                <div class="bar-fill" id="barSkills" style="background:var(--success);"></div>
+              </div>
+            </div>
+            <div class="breakdown-item">
+              <div style="display:flex; justify-content:space-between; font-size:0.75rem; margin-bottom:4px;">
+                <span>EXPERIENCE</span>
+                <span id="breakdownExp">0/20</span>
+              </div>
+              <div class="bar-frame" style="height:8px;">
+                <div class="bar-fill" id="barExp" style="background:var(--warning);"></div>
+              </div>
+            </div>
+            <div class="breakdown-item">
+              <div style="display:flex; justify-content:space-between; font-size:0.75rem; margin-bottom:4px;">
+                <span>QUALIFICATIONS</span>
+                <span id="breakdownQual">0/15</span>
+              </div>
+              <div class="bar-frame" style="height:8px;">
+                <div class="bar-fill" id="barQual" style="background:#a855f7;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RESUME ATS AUDIT (Standalone Quality) -->
+        <div class="card" id="auditCard" style="display:none; border-color: #a855f7;">
+          <div class="insight-header" style="border-bottom: 1px solid var(--fg-dark); padding-bottom:12px;">
+            <span class="insight-title" style="color:#a855f7;">// RESUME_ATS_AUDIT</span>
+            <span id="auditRisk" style="font-size:0.7rem; padding:2px 8px; border:1px solid var(--fg-dark);">—</span>
+          </div>
+
+          <!-- Audit Score -->
+          <div style="display:flex; align-items:center; gap:24px; margin:16px 0;">
+            <div style="text-align:center;">
+              <div id="auditScore" style="font-size:2rem; font-weight:800; color:#a855f7;">--</div>
+              <div style="font-size:0.6rem; color:var(--fg-secondary);">ATS COMPAT.</div>
+            </div>
+            <div style="flex:1;">
+              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; font-size:0.7rem;">
+                <div>FORMAT: <span id="auditFormat">0</span>/30</div>
+                <div>CONTACT: <span id="auditContact">0</span>/15</div>
+                <div>CONTENT: <span id="auditContent">0</span>/30</div>
+                <div>SECTIONS: <span id="auditSections">0</span>/25</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Critical Flaws -->
+          <div style="margin-top:16px;">
+            <div style="font-size:0.75rem; color:var(--error); margin-bottom:8px; font-weight:700;">CRITICAL FLAWS:
+            </div>
+            <ul id="auditFlaws" class="suggestions-list" style="margin:0; padding:0;">
+              <li class="empty-state" style="list-style:none;">No flaws detected</li>
+            </ul>
+          </div>
+
+          <!-- Recommendations -->
+          <div style="margin-top:16px;">
+            <div style="font-size:0.75rem; color:var(--accent); margin-bottom:8px; font-weight:700;">RECOMMENDATIONS:
+            </div>
+            <ul id="auditRecs" class="suggestions-list" style="margin:0; padding:0;">
+              <li class="empty-state" style="list-style:none;">Analysis pending</li>
+            </ul>
           </div>
         </div>
 
@@ -663,10 +812,10 @@
               <div class="empty-state">No data...</div>
             </div>
           </div>
-          
+
           <!-- Missing -->
           <div class="card insight-card" id="missingCard">
-             <div class="insight-header">
+            <div class="insight-header">
               <span class="insight-title" style="color:var(--warning);">// MISSING_KEYWORDS</span>
               <span class="insight-count" id="missingCount">0</span>
             </div>
@@ -678,13 +827,13 @@
 
         <!-- SUGGESTIONS -->
         <div class="card insight-card" id="suggestionsCard">
-           <div class="insight-header">
-              <span class="insight-title">// OPTIMIZATION_PROTOCOLS</span>
-              <span class="insight-count" id="suggestCount">0</span>
-            </div>
-            <ul class="suggestions-list" id="suggestList">
-               <li class="empty-state" style="list-style:none;">Analysis required...</li>
-            </ul>
+          <div class="insight-header">
+            <span class="insight-title">// OPTIMIZATION_PROTOCOLS</span>
+            <span class="insight-count" id="suggestCount">0</span>
+          </div>
+          <ul class="suggestions-list" id="suggestList">
+            <li class="empty-state" style="list-style:none;">Analysis required...</li>
+          </ul>
         </div>
 
         <!-- RAW DATA -->
@@ -780,7 +929,7 @@
       scoreDescription.textContent = 'Awaiting resume data stream for calculation...';
       scoreBar.style.width = '0%';
       scoreDisplayCircle.style.background = 'conic-gradient(from 0deg, var(--fg-dark) 100%, transparent 0%)';
-      
+
       matchBadge.textContent = 'WAITING FOR INPUT';
       matchBadge.style.borderColor = 'var(--fg-secondary)';
       matchBadge.style.color = 'var(--fg-secondary)';
@@ -815,13 +964,13 @@
     // Update score UI
     function updateScore(score) {
       const pct = Math.max(0, Math.min(100, Math.round(score)));
-      
+
       // Animate score number
       scoreNumber.textContent = pct + '%';
-      
+
       // Conic gradient for the circle
       scoreDisplayCircle.style.background = `conic-gradient(from 0deg, var(--accent) ${pct}%, var(--panel) ${pct}%)`;
-      
+
       scoreBar.style.width = pct + '%';
 
       // Update description and badge
@@ -836,13 +985,13 @@
         matchBadge.textContent = 'MATCH: MEDIUM';
         matchBadge.style.borderColor = 'var(--warning)';
         matchBadge.style.color = 'var(--warning)';
-         matchBadge.style.background = 'rgba(255,204,0,0.1)';
+        matchBadge.style.background = 'rgba(255,204,0,0.1)';
       } else {
         scoreDescription.textContent = '>> STATUS: CRITICAL. MAJOR REVISION REQUIRED.';
         matchBadge.textContent = 'MATCH: LOW';
         matchBadge.style.borderColor = 'var(--error)';
         matchBadge.style.color = 'var(--error)';
-         matchBadge.style.background = 'rgba(255,0,60,0.1)';
+        matchBadge.style.background = 'rgba(255,0,60,0.1)';
       }
     }
 
@@ -880,13 +1029,112 @@
       if (atsResult && typeof atsResult === 'object') {
         return {
           score: atsResult.match_percentage || 0,
+          breakdown: atsResult.score_breakdown || null,
+          verdict: atsResult.ats_verdict || '',
           matching: atsResult.matching_skills || [],
           missing: atsResult.missing_skills || [],
+          weaknesses: atsResult.weaknesses || [],
           suggestions: atsResult.improvement_suggestions || [],
           raw: JSON.stringify(atsResult, null, 2)
         };
       }
-      return { score: 0, matching: [], missing: [], suggestions: [], raw: String(atsResult) };
+      return { score: 0, breakdown: null, verdict: '', matching: [], missing: [], weaknesses: [], suggestions: [], raw: String(atsResult) };
+    }
+
+    // Update score breakdown UI
+    function updateBreakdown(breakdown) {
+      const card = document.getElementById('breakdownCard');
+      if (!breakdown) {
+        card.style.display = 'none';
+        return;
+      }
+      card.style.display = 'block';
+
+      const kw = breakdown.keyword_match || 0;
+      const sk = breakdown.skills_alignment || 0;
+      const ex = breakdown.experience_relevance || 0;
+      const qu = breakdown.qualifications_match || 0;
+
+      document.getElementById('breakdownKeywords').textContent = `${kw}/40`;
+      document.getElementById('breakdownSkills').textContent = `${sk}/25`;
+      document.getElementById('breakdownExp').textContent = `${ex}/20`;
+      document.getElementById('breakdownQual').textContent = `${qu}/15`;
+
+      document.getElementById('barKeywords').style.width = `${(kw / 40) * 100}%`;
+      document.getElementById('barSkills').style.width = `${(sk / 25) * 100}%`;
+      document.getElementById('barExp').style.width = `${(ex / 20) * 100}%`;
+      document.getElementById('barQual').style.width = `${(qu / 15) * 100}%`;
+    }
+
+    // Update ATS verdict
+    function updateVerdict(verdict) {
+      const el = document.getElementById('atsVerdict');
+      if (!verdict) {
+        el.textContent = '';
+        return;
+      }
+      el.textContent = `ATS VERDICT: ${verdict}`;
+      if (verdict.includes('STRONG') || verdict.includes('GOOD')) {
+        el.style.color = 'var(--success)';
+      } else if (verdict.includes('NEEDS')) {
+        el.style.color = 'var(--warning)';
+      } else {
+        el.style.color = 'var(--error)';
+      }
+    }
+
+    // Update Resume ATS Audit panel
+    function updateAudit(audit) {
+      const card = document.getElementById('auditCard');
+      if (!audit) {
+        card.style.display = 'none';
+        return;
+      }
+      card.style.display = 'block';
+
+      // Score
+      const score = audit.ats_compatibility_score || 0;
+      document.getElementById('auditScore').textContent = score + '%';
+
+      // Breakdown
+      const bd = audit.audit_breakdown || {};
+      document.getElementById('auditFormat').textContent = bd.format_structure || 0;
+      document.getElementById('auditContact').textContent = bd.contact_info || 0;
+      document.getElementById('auditContent').textContent = bd.content_quality || 0;
+      document.getElementById('auditSections').textContent = bd.section_completeness || 0;
+
+      // Risk level
+      const risk = audit.ats_parse_risk || 'UNKNOWN';
+      const riskEl = document.getElementById('auditRisk');
+      riskEl.textContent = `RISK: ${risk}`;
+      if (risk === 'LOW') {
+        riskEl.style.borderColor = 'var(--success)';
+        riskEl.style.color = 'var(--success)';
+      } else if (risk === 'MEDIUM') {
+        riskEl.style.borderColor = 'var(--warning)';
+        riskEl.style.color = 'var(--warning)';
+      } else {
+        riskEl.style.borderColor = 'var(--error)';
+        riskEl.style.color = 'var(--error)';
+      }
+
+      // Critical flaws
+      const flaws = audit.critical_flaws || [];
+      const flawsEl = document.getElementById('auditFlaws');
+      if (flaws.length === 0) {
+        flawsEl.innerHTML = '<li class="empty-state" style="list-style:none;">No critical flaws detected ✓</li>';
+      } else {
+        flawsEl.innerHTML = flaws.map(f => `<li style="color:var(--error);">${escapeHtml(f)}</li>`).join('');
+      }
+
+      // Recommendations
+      const recs = audit.recommendations || [];
+      const recsEl = document.getElementById('auditRecs');
+      if (recs.length === 0) {
+        recsEl.innerHTML = '<li class="empty-state" style="list-style:none;">Resume looks good!</li>';
+      } else {
+        recsEl.innerHTML = recs.map(r => `<li>${escapeHtml(r)}</li>`).join('');
+      }
     }
 
     // Form submit
@@ -930,10 +1178,16 @@
         }
 
         const atsResult = data.ats_result;
+        const resumeAudit = data.resume_audit;  // Standalone ATS audit
         const parsed = parseAnalysisResult(atsResult);
 
-        // Update UI
+        // Update UI - Job Match Analysis
         updateScore(parsed.score);
+        updateBreakdown(parsed.breakdown);
+        updateVerdict(parsed.verdict);
+
+        // Update UI - Resume ATS Audit (standalone)
+        updateAudit(resumeAudit);
 
         renderTags(matchingList, parsed.matching, 'matching');
         matchingCount.textContent = `${parsed.matching.length}`;
@@ -944,9 +1198,13 @@
         renderSuggestions(parsed.suggestions);
         suggestCount.textContent = `${parsed.suggestions.length}`;
 
-        rawAnalysis.textContent = parsed.raw;
+        // Show both results in raw
+        rawAnalysis.textContent = JSON.stringify({
+          job_match: atsResult,
+          resume_audit: resumeAudit
+        }, null, 2);
 
-        formStatus.innerHTML = '<span class="status-success">> SUCCESS: ANALYSIS COMPLETE.</span>';
+        formStatus.innerHTML = '<span class="status-success">> SUCCESS: DUAL ANALYSIS COMPLETE.</span>';
       } catch (err) {
         console.error(err);
         formStatus.innerHTML = `<span class="status-error">> ERROR: ${err.message}</span>`;
@@ -956,4 +1214,5 @@
     });
   </script>
 </body>
+
 </html>
