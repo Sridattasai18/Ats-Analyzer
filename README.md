@@ -1,55 +1,121 @@
-# ATS Resume Analyzer
+# ATS_ANALYZER // SYSTEM_ACTIVE
 
-A simple web application that acts as an Applicant Tracking System (ATS). It analyzes a resume against a job description and provides a match score and suggestions for improvement.
+> **Industrial-grade resume analysis.** Upload your resume, paste a job description, and get an instant ATS compatibility score with actionable optimization protocols.
 
-## Features
+---
 
-- Upload a resume in PDF format.
-- Paste a job description.
-- Get an ATS score based on the match between the resume and the job description.
-- Identify matching and missing keywords.
-- Receive suggestions to improve your resume for the specific job.
+## ⚡ Features
 
-## Tech Stack
+- **PDF Resume Parsing** — Extracts text from uploaded PDF resumes
+- **AI-Powered Analysis** — Uses Google Gemini to compare resume vs job description
+- **Match Score** — Get a percentage-based compatibility index
+- **Keyword Detection** — Identifies matching and missing skills
+- **Improvement Suggestions** — Actionable recommendations to optimize your resume
+- **Retry Logic** — Handles API rate limits and overload gracefully
 
-- **Backend:** Python, Flask
-- **AI:** Google Gemini API
-- **Frontend:** HTML, CSS, JavaScript
-- **PDF Parsing:** PyPDF2
+---
 
-## Setup and Installation
+## 🛠 Tech Stack
 
-1.  **Clone the repository:**
-    ```bash
-    git clone <repository-url>
-    cd ATS-proj
-    ```
+| Layer      | Technology                        |
+|------------|-----------------------------------|
+| Backend    | Python 3.x, Flask                 |
+| AI Engine  | Google Gemini API (`gemini-2.5-flash`) |
+| Frontend   | HTML, CSS (Industrial Terminal UI), Vanilla JS |
+| PDF Parser | PyPDF2                            |
 
-2.  **Install dependencies:**
-    Make sure you have Python 3.6+ installed.
-    ```bash
-    pip install -r requirements.txt
-    ```
+---
 
-3.  **Set up environment variables:**
-    Create a file named `.env` in the root of the project and add your Google Gemini API key:
-    ```
-    GEMINI_API_KEY="your_api_key_here"
-    ```
-    You can get your API key from [Google AI Studio](https://aistudio.google.com/).
+## 🚀 Quick Start
 
-4.  **Run the application:**
-    ```bash
-    python main.py
-    ```
+### 1. Clone the Repository
 
-5.  **Access the application:**
-    Open your web browser and navigate to `http://127.0.0.1:5000`.
+```bash
+git clone https://github.com/Sridattasai18/Ats-Analyzer.git
+cd Ats-Analyzer
+```
 
-## How to Use
+### 2. Create & Activate Virtual Environment
 
-1.  Open the web application in your browser.
-2.  Click on "Browse" or "Choose PDF resume" to upload your resume in PDF format.
-3.  Paste the job description into the text area.
-4.  Click the "Analyze" button.
-5.  The application will process the documents and display the ATS score, insights, and suggestions.
+```bash
+# Windows
+python -m venv venv
+venv\Scripts\activate
+
+# macOS/Linux
+python3 -m venv venv
+source venv/bin/activate
+```
+
+### 3. Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Configure API Key
+
+Create a `.env` file in the project root:
+
+```env
+GEMINI_API_KEY=your_api_key_here
+```
+
+> 🔑 Get your free API key from [Google AI Studio](https://aistudio.google.com/)
+
+### 5. Run the Application
+
+```bash
+python main.py
+```
+
+### 6. Open in Browser
+
+Navigate to: **`http://127.0.0.1:5000`**
+
+---
+
+## 📖 How to Use
+
+1. **Upload** — Drop or select your PDF resume
+2. **Paste** — Enter the target job description
+3. **Analyze** — Click `[ INITIATE ANALYSIS ]`
+4. **Review** — Check your match score, matching/missing keywords, and optimization suggestions
+
+---
+
+## 📁 Project Structure
+
+```
+Ats-Analyzer/
+├── main.py              # Flask backend with Gemini integration
+├── requirements.txt     # Python dependencies
+├── .env                 # API key (not committed)
+├── .gitignore
+├── uploads/             # Temporary PDF storage
+└── templates/
+    └── index.html       # Industrial terminal-style UI
+```
+
+---
+
+## ⚠️ Troubleshooting
+
+| Error | Solution |
+|-------|----------|
+| `503 UNAVAILABLE` | Gemini API overloaded — retry automatically handled, or wait 30s |
+| `429 RESOURCE_EXHAUSTED` | API quota exceeded — wait or upgrade plan |
+| `405 Method Not Allowed` | Ensure you're using POST to `/analyze` |
+
+---
+
+## 📜 License
+
+This project is open source and available under the [MIT License](LICENSE).
+
+---
+
+## 👤 Author
+
+**Kaligotla Sri Datta Sai**  
+GitHub: [@Sridattasai18](https://github.com/Sridattasai18)
