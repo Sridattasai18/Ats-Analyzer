@@ -1,0 +1,959 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ATS_ANALYZER // SYSTEM_ACTIVE</title>
+  <meta name="description" content="Industrial-grade ATS Resume Analysis Protocol.">
+
+  <!-- Anti-AI Aesthetic: Monospace is King -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700;800&display=swap"
+    rel="stylesheet">
+
+  <style>
+    :root {
+      /* PALETTE: HEAVY INDUSTRY / TERMINAL */
+      --void: #050505;
+      --panel: #0a0a0f;
+      --panel-light: #121216;
+      --grid-line: #1a1a1a;
+      
+      /* FOREGROUND */
+      --fg-primary: #e0e0e0;
+      --fg-secondary: #808080;
+      --fg-dark: #303030;
+
+      /* IDENTITY: HAZARD ORANGE */
+      --accent: #ff5500;
+      --accent-dim: rgba(255, 85, 0, 0.15);
+      
+      /* UTILITY */
+      --success: #00ff41; /* Terminal Green */
+      --warning: #ffcc00;
+      --error: #ff003c;
+      
+      /* DIMENSIONS */
+      --border-thick: 2px;
+      --border-thin: 1px;
+      --radius: 0px; /* BRUTALIST RULE: NO ROUNDED CORNERS */
+      
+      /* FONT */
+      --mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      font-family: var(--mono);
+      background-color: var(--void);
+      color: var(--fg-primary);
+      overflow-x: hidden;
+      /* Scanline texture */
+      background-image: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+      background-size: 100% 2px, 3px 100%;
+    }
+    
+    /* Selection is inverted */
+    ::selection {
+      background: var(--accent);
+      color: var(--void);
+    }
+
+    /* Layout Main */
+    .wrap {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 4vh 20px;
+      border-top: 4px solid var(--accent);
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      display: grid;
+      gap: 32px;
+      grid-template-columns: 450px 1fr;
+    }
+
+    /* Header */
+    header.appHeader {
+      grid-column: 1 / -1;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      border-bottom: var(--border-thick) solid var(--grid-line);
+      padding-bottom: 24px;
+      margin-bottom: 16px;
+    }
+
+    .brand-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .system-badge {
+      font-size: 10px;
+      background: var(--accent);
+      color: var(--void);
+      padding: 2px 6px;
+      width: fit-content;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 2rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: -1px;
+      line-height: 1;
+    }
+    
+    h1 span {
+      color: var(--fg-dark);
+    }
+
+    p.lead {
+      margin: 8px 0 0 0;
+      color: var(--fg-secondary);
+      font-size: 0.85rem;
+      max-width: 600px;
+      line-height: 1.4;
+    }
+
+    /* CARD SYSTEM: INDUSTRIAL PANELS */
+    .card {
+      background: var(--panel);
+      border: var(--border-thick) solid var(--grid-line);
+      padding: 24px;
+      position: relative;
+    }
+    
+    /* Decoration: Corner Brackets */
+    .card::before {
+      content: '';
+      position: absolute;
+      top: -2px; left: -2px;
+      width: 10px; height: 10px;
+      border-top: 2px solid var(--accent);
+      border-left: 2px solid var(--accent);
+    }
+    .card::after {
+      content: '';
+      position: absolute;
+      bottom: -2px; right: -2px;
+      width: 10px; height: 10px;
+      border-bottom: 2px solid var(--accent);
+      border-right: 2px solid var(--accent);
+    }
+
+    /* Titles */
+    .section-title {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--accent);
+      margin: 0 0 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-title::before {
+      content: '//';
+      color: var(--fg-dark);
+    }
+
+    /* FORMS & INPUTS */
+    .file-upload-area {
+      border: 1px dashed var(--fg-secondary);
+      background: var(--panel-light);
+      padding: 32px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.1s;
+      margin-bottom: 16px;
+    }
+
+    .file-upload-area:hover,
+    .file-upload-area.dragover {
+      border: 1px dashed var(--accent);
+      background: var(--accent-dim);
+    }
+
+    .file-upload-area.has-file {
+      border: 1px solid var(--success);
+      background: rgba(0, 255, 65, 0.05);
+    }
+
+    .upload-text {
+      font-weight: 700;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+    }
+
+    .file-name {
+      margin-top: 8px;
+      font-size: 0.8rem;
+      color: var(--success);
+      background: var(--panel-light);
+      border: 1px solid var(--success);
+      padding: 8px;
+      display: none;
+    }
+    .file-name.show { display: block; }
+
+    input[type="file"] { display: none; }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      color: var(--fg-secondary);
+      font-weight: 700;
+    }
+
+    textarea#job_description {
+      width: 100%;
+      min-height: 180px;
+      background: var(--void);
+      border: 1px solid var(--fg-dark);
+      color: var(--fg-primary);
+      padding: 16px;
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      line-height: 1.5;
+      resize: vertical;
+      transition: border-color 0.1s;
+    }
+
+    textarea#job_description:focus {
+      outline: none;
+      border-color: var(--accent);
+      border-left: 4px solid var(--accent);
+    }
+
+    /* BUTTONS: MECHANICAL SWITCHES */
+    .btn-row {
+      display: flex;
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    .btn {
+      flex: 1;
+      height: 48px;
+      border: none;
+      font-family: var(--mono);
+      font-weight: 800;
+      text-transform: uppercase;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      transition: all 0.1s;
+      position: relative;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: var(--void);
+      border: 1px solid var(--accent);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--void);
+      color: var(--accent);
+      transform: translate(-2px, -2px);
+      box-shadow: 4px 4px 0 var(--fg-dark);
+    }
+
+    .btn-primary:active:not(:disabled) {
+      transform: translate(0, 0);
+      box-shadow: none;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid var(--fg-secondary);
+      color: var(--fg-secondary);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      border-color: var(--fg-primary);
+      color: var(--fg-primary);
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      filter: grayscale(1);
+    }
+
+    #formStatus { margin-top: 16px; height: 24px; font-size: 0.8rem; }
+    .status-error { color: var(--error); }
+    .status-success { color: var(--success); }
+
+    /* RESULTS GRID */
+    .results {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* SCORE MODULE (Redesigned) */
+    .score-card {
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: 32px;
+      align-items: center;
+    }
+
+    .score-display {
+      width: 140px;
+      height: 140px;
+      border: 2px solid var(--fg-dark);
+      border-radius: 50%; /* Keeping circle but making it stripped */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      background: conic-gradient(from 0deg, var(--accent) 0%, transparent 0%); /* JS will update */
+    }
+    
+    /* Inner cutout for ring effect */
+    .score-display::before {
+      content: '';
+      position: absolute;
+      inset: 10px;
+      background: var(--panel);
+      border-radius: 50%;
+      z-index: 1;
+    }
+    
+    .score-value-wrap {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+    }
+
+    .score-number {
+      display: block;
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--fg-primary);
+    }
+    
+    .score-label {
+      font-size: 0.6rem;
+      text-transform: uppercase;
+      color: var(--fg-secondary);
+      letter-spacing: 1px;
+    }
+
+    .score-details h3 {
+      font-size: 1.1rem;
+      text-transform: uppercase;
+      margin: 0 0 8px 0;
+    }
+
+    .score-description {
+       font-size: 0.85rem;
+       color: var(--fg-secondary);
+       margin-bottom: 16px;
+    }
+
+    /* Progress Bar custom */
+    .bar-frame {
+      height: 12px;
+      border: 1px solid var(--fg-dark);
+      background: var(--void);
+      position: relative;
+      margin-bottom: 8px;
+    }
+    
+    .bar-fill {
+      height: 100%;
+      background: repeating-linear-gradient(
+        45deg,
+        var(--accent),
+        var(--accent) 5px,
+        var(--void) 5px,
+        var(--void) 10px
+      );
+      width: 0%;
+      transition: width 0.5s steps(10);
+    }
+
+    .match-badge-box {
+      display: inline-block;
+      border: 1px solid var(--fg-secondary);
+      padding: 4px 12px;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    /* INSIGHTS UTILS */
+    .insights-subgrid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .insight-card {
+      min-height: 200px;
+    }
+    
+    .insight-header {
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--fg-dark); /* Separator */
+      padding-bottom: 8px;
+      margin-bottom: 16px;
+    }
+    
+    .insight-title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+    
+    .insight-count {
+      font-size: 0.8rem;
+      color: var(--fg-secondary);
+      font-family: var(--mono);
+    }
+
+    /* Tags */
+    .tags-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tag {
+      font-size: 0.75rem;
+      padding: 4px 8px;
+      border: 1px solid var(--fg-dark);
+      text-transform: uppercase;
+    }
+    
+    .tag.matching {
+      border-color: var(--success);
+      color: var(--success);
+      background: rgba(0, 255, 65, 0.05);
+    }
+    
+    .tag.missing {
+      border-color: var(--error);
+      color: var(--error);
+      background: rgba(255, 0, 60, 0.05);
+    }
+
+    .suggestions-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .suggestions-list li {
+      margin-bottom: 12px;
+      padding-left: 16px;
+      position: relative;
+      font-size: 0.85rem;
+      line-height: 1.5;
+      color: var(--fg-primary);
+    }
+    
+    .suggestions-list li::before {
+      content: '>';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .empty-state {
+      color: var(--fg-dark);
+      font-style: italic;
+      font-size: 0.8rem;
+    }
+
+    /* Raw Analysis */
+    .collapsible-header {
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 4px;
+    }
+    
+    .raw-analysis {
+      background: var(--void);
+      border: 1px solid var(--fg-dark);
+      padding: 16px;
+      margin-top: 16px;
+      max-height: 300px;
+      overflow-y: auto;
+      font-size: 0.75rem;
+      color: var(--fg-secondary);
+    }
+    
+    .collapsible-content {
+      display: none;
+    }
+    .collapsible.open .collapsible-content { display: block; }
+
+    /* LOADING OVERLAY: TERMINAL BOOT */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 5, 5, 0.95);
+      z-index: 999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+    .overlay.show { display: flex; }
+
+    .loader-text {
+      font-size: 1.5rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+      color: var(--accent);
+      animation: blink 0.5s step-end infinite alternate;
+    }
+    
+    .progress-bar-loader {
+      width: 300px;
+      height: 4px;
+      background: var(--fg-dark);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .progress-bar-loader::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; bottom: 0;
+      width: 50%;
+      background: var(--accent);
+      animation: loadscan 1s linear infinite;
+    }
+
+    @keyframes loadscan {
+      0% { left: -50%; }
+      100% { left: 100%; }
+    }
+
+    @keyframes blink {
+      0% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .container { grid-template-columns: 1fr; }
+      .insights-subgrid { grid-template-columns: 1fr; }
+      .score-card { grid-template-columns: 1fr; gap: 16px; text-align: center; }
+      .score-display { margin: 0 auto; }
+      .match-badge-box { width: 100%; text-align: center; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="wrap">
+    <header class="appHeader">
+      <div class="brand-group">
+        <div class="system-badge">SYS.VER.2.0</div>
+        <h1>ATS <span>Analyzer</span></h1>
+      </div>
+      <div style="text-align:right;">
+        <span style="font-size:0.7rem; color:var(--fg-secondary);">STATUS: ONLINE</span>
+      </div>
+    </header>
+
+    <div class="container">
+      
+      <!-- INPUT PANEL -->
+      <section class="card">
+        <h2 class="section-title">INPUT_DATA_STREAM</h2>
+        <form id="uploadForm" enctype="multipart/form-data" method="post" novalidate>
+          
+          <div class="file-upload-area" id="dropZone">
+             <div style="font-size:2rem; margin-bottom:8px;">↓</div>
+             <div class="upload-text">Drop PDF Resume</div>
+             <div class="upload-hint" style="font-size:0.7rem; color:var(--fg-secondary); margin-top:4px;">MAX SIZE 5MB</div>
+             <input type="file" id="resume" name="resume" accept="application/pdf" />
+          </div>
+          <div class="file-name" id="fileName"></div>
+
+          <div style="margin-top:24px;">
+            <label for="job_description">TARGET_PARAMETERS (JOB DESC)</label>
+            <textarea id="job_description" name="job_description" placeholder="> PASTE JOB REQUIREMENTS HERE..."></textarea>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn btn-primary" id="analyzeBtn" type="submit">
+              [ INITIATE ANALYSIS ]
+            </button>
+            <button class="btn btn-secondary" type="reset" id="resetBtn">
+              RESET
+            </button>
+          </div>
+          <div id="formStatus"></div>
+        </form>
+      </section>
+
+      <!-- RESULTS PANEL -->
+      <section class="results">
+        
+        <!-- MAIN SCORE -->
+        <div class="card score-card" id="scoreCard">
+          <div class="score-display" id="scoreDisplayCircle">
+            <div class="score-value-wrap">
+              <span class="score-number" id="scoreNumber">--</span>
+              <span class="score-label">MATCH %</span>
+            </div>
+          </div>
+          <div class="score-details">
+             <h3>COMPATIBILITY_INDEX</h3>
+             <div id="matchBadge" class="match-badge-box" style="border-style:dashed;">WAITING FOR INPUT</div>
+             <p class="score-description" id="scoreDescription">Awaiting resume data stream for calculation...</p>
+             
+             <!-- Custom Bar -->
+             <div class="bar-frame">
+               <div class="bar-fill" id="scoreBar"></div>
+             </div>
+             <div style="display:flex; justify-content:space-between; font-size:0.6rem; color:var(--fg-secondary);">
+               <span>0</span><span>100</span>
+             </div>
+          </div>
+        </div>
+
+        <!-- INSIGHTS GRID -->
+        <div class="insights-subgrid">
+          <!-- Matching -->
+          <div class="card insight-card" id="matchingCard">
+            <div class="insight-header">
+              <span class="insight-title" style="color:var(--success);">// MATCHING_KEYWORDS</span>
+              <span class="insight-count" id="matchingCount">0</span>
+            </div>
+            <div class="tags-list" id="matchingList">
+              <div class="empty-state">No data...</div>
+            </div>
+          </div>
+          
+          <!-- Missing -->
+          <div class="card insight-card" id="missingCard">
+             <div class="insight-header">
+              <span class="insight-title" style="color:var(--warning);">// MISSING_KEYWORDS</span>
+              <span class="insight-count" id="missingCount">0</span>
+            </div>
+            <div class="tags-list" id="missingList">
+              <div class="empty-state">No data...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SUGGESTIONS -->
+        <div class="card insight-card" id="suggestionsCard">
+           <div class="insight-header">
+              <span class="insight-title">// OPTIMIZATION_PROTOCOLS</span>
+              <span class="insight-count" id="suggestCount">0</span>
+            </div>
+            <ul class="suggestions-list" id="suggestList">
+               <li class="empty-state" style="list-style:none;">Analysis required...</li>
+            </ul>
+        </div>
+
+        <!-- RAW DATA -->
+        <div class="card collapsible" id="rawCard">
+          <div class="collapsible-header" onclick="toggleRaw()">
+            <span style="font-size:0.8rem; font-weight:700;">> VIEW_RAW_LOGS</span>
+            <span>+</span>
+          </div>
+          <div class="collapsible-content">
+            <div class="raw-analysis" id="rawAnalysis">WAITING...</div>
+          </div>
+        </div>
+
+      </section>
+
+    </div>
+  </div>
+
+  <!-- LOADING OVERLAY -->
+  <div class="overlay" id="loadingOverlay">
+    <div class="loader-text">PROCESSING DATA STREAM...</div>
+    <div class="progress-bar-loader"></div>
+  </div>
+
+  <!-- LOGIC SCRIPT (PRESERVED & ADAPTED FOR NEW UI IDs) -->
+  <script>
+    // Elements
+    const resumeInput = document.getElementById('resume');
+    const fileNameEl = document.getElementById('fileName');
+    const dropZone = document.getElementById('dropZone');
+    const uploadForm = document.getElementById('uploadForm');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+
+    const scoreNumber = document.getElementById('scoreNumber');
+    const scoreDescription = document.getElementById('scoreDescription');
+    const scoreBar = document.getElementById('scoreBar');
+    const matchBadge = document.getElementById('matchBadge');
+    const scoreDisplayCircle = document.getElementById('scoreDisplayCircle');
+
+    const matchingList = document.getElementById('matchingList');
+    const matchingCount = document.getElementById('matchingCount');
+    const missingList = document.getElementById('missingList');
+    const missingCount = document.getElementById('missingCount');
+    const suggestList = document.getElementById('suggestList');
+    const suggestCount = document.getElementById('suggestCount');
+    const rawAnalysis = document.getElementById('rawAnalysis');
+
+    // File drag and drop
+    dropZone.addEventListener('click', () => resumeInput.click());
+
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('dragover');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.classList.remove('dragover');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      const files = e.dataTransfer.files;
+      if (files.length && files[0].type === 'application/pdf') {
+        resumeInput.files = files;
+        updateFileName(files[0]);
+      }
+    });
+
+    resumeInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) updateFileName(file);
+    });
+
+    function updateFileName(file) {
+      fileNameEl.textContent = `[FILE_DETECTED]: ${file.name} >> ${(file.size / 1024).toFixed(1)} KB`;
+      fileNameEl.classList.add('show');
+      dropZone.classList.add('has-file');
+    }
+
+    // Reset
+    resetBtn.addEventListener('click', () => {
+      fileNameEl.textContent = '';
+      fileNameEl.classList.remove('show');
+      dropZone.classList.remove('has-file');
+      resetResults();
+    });
+
+    function resetResults() {
+      scoreNumber.textContent = '--';
+      scoreDescription.textContent = 'Awaiting resume data stream for calculation...';
+      scoreBar.style.width = '0%';
+      scoreDisplayCircle.style.background = 'conic-gradient(from 0deg, var(--fg-dark) 100%, transparent 0%)';
+      
+      matchBadge.textContent = 'WAITING FOR INPUT';
+      matchBadge.style.borderColor = 'var(--fg-secondary)';
+      matchBadge.style.color = 'var(--fg-secondary)';
+      matchBadge.style.background = 'transparent';
+
+      matchingList.innerHTML = '<div class="empty-state">No data...</div>';
+      matchingCount.textContent = '0';
+      missingList.innerHTML = '<div class="empty-state">No data...</div>';
+      missingCount.textContent = '0';
+      suggestList.innerHTML = '<li class="empty-state" style="list-style:none;">Analysis required...</li>';
+      suggestCount.textContent = '0';
+      rawAnalysis.textContent = 'WAITING...';
+      document.getElementById('formStatus').innerHTML = '';
+    }
+
+    // Toggle raw analysis
+    function toggleRaw() {
+      document.getElementById('rawCard').classList.toggle('open');
+    }
+
+    // Loading state
+    function setLoading(loading) {
+      if (loading) {
+        loadingOverlay.classList.add('show');
+        analyzeBtn.disabled = true;
+      } else {
+        loadingOverlay.classList.remove('show');
+        analyzeBtn.disabled = false;
+      }
+    }
+
+    // Update score UI
+    function updateScore(score) {
+      const pct = Math.max(0, Math.min(100, Math.round(score)));
+      
+      // Animate score number
+      scoreNumber.textContent = pct + '%';
+      
+      // Conic gradient for the circle
+      scoreDisplayCircle.style.background = `conic-gradient(from 0deg, var(--accent) ${pct}%, var(--panel) ${pct}%)`;
+      
+      scoreBar.style.width = pct + '%';
+
+      // Update description and badge
+      if (pct >= 75) {
+        scoreDescription.textContent = '>> STATUS: OPTIMAL. HIGH ALIGNMENT DETECTED.';
+        matchBadge.textContent = 'MATCH: HIGH';
+        matchBadge.style.borderColor = 'var(--success)';
+        matchBadge.style.color = 'var(--success)';
+        matchBadge.style.background = 'rgba(0,255,65,0.1)';
+      } else if (pct >= 50) {
+        scoreDescription.textContent = '>> STATUS: ACCEPTABLE. OPTIMIZATION RECOMMENDED.';
+        matchBadge.textContent = 'MATCH: MEDIUM';
+        matchBadge.style.borderColor = 'var(--warning)';
+        matchBadge.style.color = 'var(--warning)';
+         matchBadge.style.background = 'rgba(255,204,0,0.1)';
+      } else {
+        scoreDescription.textContent = '>> STATUS: CRITICAL. MAJOR REVISION REQUIRED.';
+        matchBadge.textContent = 'MATCH: LOW';
+        matchBadge.style.borderColor = 'var(--error)';
+        matchBadge.style.color = 'var(--error)';
+         matchBadge.style.background = 'rgba(255,0,60,0.1)';
+      }
+    }
+
+    // Render tags
+    function renderTags(container, items, type) {
+      if (!items || items.length === 0) {
+        container.innerHTML = `<div class="empty-state">NULL RETURN</div>`;
+        return;
+      }
+      container.innerHTML = items.map(item =>
+        `<span class="tag ${type}">${escapeHtml(item)}</span>`
+      ).join('');
+    }
+
+    // Render suggestions
+    function renderSuggestions(items) {
+      if (!items || items.length === 0) {
+        suggestList.innerHTML = '<li class="empty-state" style="list-style:none;">NO OPTIMIZATIONS FOUND.</li>';
+        return;
+      }
+      suggestList.innerHTML = items.map(item =>
+        `<li>${escapeHtml(item)}</li>`
+      ).join('');
+    }
+
+    // Escape HTML
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    // Parse response
+    function parseAnalysisResult(atsResult) {
+      if (atsResult && typeof atsResult === 'object') {
+        return {
+          score: atsResult.match_percentage || 0,
+          matching: atsResult.matching_skills || [],
+          missing: atsResult.missing_skills || [],
+          suggestions: atsResult.improvement_suggestions || [],
+          raw: JSON.stringify(atsResult, null, 2)
+        };
+      }
+      return { score: 0, matching: [], missing: [], suggestions: [], raw: String(atsResult) };
+    }
+
+    // Form submit
+    uploadForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formStatus = document.getElementById('formStatus');
+
+      // Validate
+      if (!resumeInput.files.length) {
+        formStatus.innerHTML = '<span class="status-error">> ERROR: NO FILE INPUT PROTOCOL.</span>';
+        return;
+      }
+      if (!document.getElementById('job_description').value.trim()) {
+        formStatus.innerHTML = '<span class="status-error">> ERROR: MISSING PARAMETERS (JOB DESC).</span>';
+        return;
+      }
+
+      formStatus.innerHTML = '';
+      setLoading(true);
+
+      try {
+        const formData = new FormData(uploadForm);
+        const resp = await fetch('/analyze', { method: 'POST', body: formData });
+
+        const responseText = await resp.text();
+        let data;
+        try {
+          data = responseText ? JSON.parse(responseText) : null;
+        } catch (parseError) {
+          console.error(parseError);
+          throw new Error('DATA CORRUPTION. INVALID SERVER RESPONSE.');
+        }
+
+        if (!resp.ok) {
+          const errorMsg = data?.error || `SYSTEM ERROR (${resp.status})`;
+          throw new Error(errorMsg);
+        }
+
+        if (!data || !data.ats_result) {
+          throw new Error('NULL DATA RECEIVED.');
+        }
+
+        const atsResult = data.ats_result;
+        const parsed = parseAnalysisResult(atsResult);
+
+        // Update UI
+        updateScore(parsed.score);
+
+        renderTags(matchingList, parsed.matching, 'matching');
+        matchingCount.textContent = `${parsed.matching.length}`;
+
+        renderTags(missingList, parsed.missing, 'missing');
+        missingCount.textContent = `${parsed.missing.length}`;
+
+        renderSuggestions(parsed.suggestions);
+        suggestCount.textContent = `${parsed.suggestions.length}`;
+
+        rawAnalysis.textContent = parsed.raw;
+
+        formStatus.innerHTML = '<span class="status-success">> SUCCESS: ANALYSIS COMPLETE.</span>';
+      } catch (err) {
+        console.error(err);
+        formStatus.innerHTML = `<span class="status-error">> ERROR: ${err.message}</span>`;
+      } finally {
+        setLoading(false);
+      }
+    });
+  </script>
+</body>
+</html>
