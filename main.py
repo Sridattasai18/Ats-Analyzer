@@ -30,11 +30,11 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
 if GEMINI_API_KEY:
     print("API Key loaded: YES (length:", len(GEMINI_API_KEY), ")")
+    client = genai.Client(api_key=GEMINI_API_KEY)
 else:
-    print("API Key loaded: NO")
-    raise RuntimeError("API key not found. Set GEMINI_API_KEY or GOOGLE_API_KEY in .env")
-
-client = genai.Client(api_key=GEMINI_API_KEY)
+    print("API Key loaded: NO - App will start but analysis will be unavailable")
+    print("To enable analysis, set GEMINI_API_KEY or GOOGLE_API_KEY in .env")
+    client = None
 
 
 app = Flask(__name__)
@@ -70,6 +70,9 @@ def extract_text_from_pdf(pdf_path):
 
 def gemini_json(prompt, max_retries=3):
     """Call Gemini API with automatic retry on overload/rate-limit errors."""
+    if client is None:
+        raise ValueError("API key not configured. Please add GEMINI_API_KEY to your .env file.")
+    
     last_error = None
     
     for attempt in range(max_retries):
@@ -298,10 +301,7 @@ def analyze():
             return jsonify({"error": "Resume PDF is required"}), 400
 
         resume_file = request.files["resume"]
-        jd_text = request.form.get("job_description")
-
-        if not jd_text:
-            return jsonify({"error": "Job description is required"}), 400
+        jd_text = request.form.get("job_description", "").strip()  # Optional now
 
         if resume_file.filename == "":
             return jsonify({"error": "No file selected"}), 400
@@ -316,38 +316,61 @@ def analyze():
         try:
             resume_text = extract_text_from_pdf(pdf_path)
             if not resume_text:
-                return jsonify({"error": "Could not extract text from PDF"}), 400
+                return jsonify({"error": "Could not extract text from PDF. The file may be scanned or image-based."}), 400
 
-            # Parse resume and job description
+            # Parse resume (always required)
             parsed_resume = parse_resume(resume_text)
-            parsed_jd = parse_job_description(jd_text)
             
-            # Two separate analyses:
-            # 1. Resume ATS Audit (standalone quality check)
+            # Resume ATS Audit (ALWAYS runs - standalone quality check)
             resume_audit = resume_ats_audit(resume_text)
             
-            # 2. Resume vs Job Description Match
-            ats_result = ats_match(parsed_resume, parsed_jd)
+            # Job Description matching (OPTIONAL - only if JD provided)
+            if jd_text:
+                parsed_jd = parse_job_description(jd_text)
+                ats_result = ats_match(parsed_resume, parsed_jd)
+                jd_provided = True
+            else:
+                parsed_jd = None
+                ats_result = None
+                jd_provided = False
 
             return jsonify({
+                "jd_provided": jd_provided,
                 "parsed_resume": parsed_resume,
                 "parsed_job_description": parsed_jd,
-                "resume_audit": resume_audit,  # Standalone ATS quality
-                "ats_result": ats_result        # Job match analysis
+                "resume_audit": resume_audit,  # Always present - standalone ATS quality
+                "ats_result": ats_result        # Only present if JD was provided
             })
         finally:
             # Always cleanup uploaded file
             if os.path.exists(pdf_path):
                 os.remove(pdf_path)
 
+    except ValueError as ve:
+        # Handle API key not configured
+        error_str = str(ve)
+        if "API key not configured" in error_str:
+            return jsonify({
+                "error": "API key not configured. Please add your GEMINI_API_KEY to the .env file and restart the server."
+            }), 503
+        return jsonify({"error": error_str}), 400
+
     except Exception as e:
         # Specific handling for Gemini quota exhaustion
         error_str = str(e)
         if "RESOURCE_EXHAUSTED" in error_str or "429" in error_str:
             return jsonify({
-                "error": "Gemini API quota exceeded. Please wait a few minutes and try again, or upgrade your plan."
+                "error": "API quota exceeded. Please wait a few minutes and try again."
             }), 429
-        return jsonify({"error": error_str}), 500
+        elif "503" in error_str or "overloaded" in error_str.lower():
+            return jsonify({
+                "error": "AI service is temporarily overloaded. Please try again in a moment."
+            }), 503
+        elif "JSON" in error_str or "parse" in error_str.lower():
+            return jsonify({
+                "error": "Failed to parse AI response. Please try again."
+            }), 500
+        return jsonify({"error": f"Analysis failed: {error_str}"}), 500
 
 
 # ==============================

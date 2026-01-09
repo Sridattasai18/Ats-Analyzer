@@ -911,9 +911,25 @@
     });
 
     function updateFileName(file) {
+      const MAX_SIZE_MB = 5;
+      const sizeMB = file.size / (1024 * 1024);
+
+      if (sizeMB > MAX_SIZE_MB) {
+        fileNameEl.textContent = `[ERROR]: File too large (${sizeMB.toFixed(1)}MB). Max size is ${MAX_SIZE_MB}MB.`;
+        fileNameEl.style.color = 'var(--error)';
+        fileNameEl.style.borderColor = 'var(--error)';
+        fileNameEl.classList.add('show');
+        dropZone.classList.remove('has-file');
+        resumeInput.value = '';  // Clear invalid file
+        return false;
+      }
+
       fileNameEl.textContent = `[FILE_DETECTED]: ${file.name} >> ${(file.size / 1024).toFixed(1)} KB`;
+      fileNameEl.style.color = 'var(--success)';
+      fileNameEl.style.borderColor = 'var(--success)';
       fileNameEl.classList.add('show');
       dropZone.classList.add('has-file');
+      return true;
     }
 
     // Reset
@@ -1083,6 +1099,52 @@
       }
     }
 
+    // Update score display from audit (when no JD provided)
+    function updateScoreFromAudit(audit) {
+      if (!audit) return;
+
+      const score = audit.ats_compatibility_score || 0;
+      const pct = Math.max(0, Math.min(100, Math.round(score)));
+
+      // Update main score display
+      scoreNumber.textContent = pct + '%';
+      scoreDisplayCircle.style.background = `conic-gradient(from 0deg, #a855f7 ${pct}%, var(--panel) ${pct}%)`;
+      scoreBar.style.width = pct + '%';
+
+      // Update description based on audit
+      const risk = audit.ats_parse_risk || 'UNKNOWN';
+      if (pct >= 75) {
+        scoreDescription.textContent = '>> STATUS: RESUME ATS-READY. Good compatibility.';
+        matchBadge.textContent = 'ATS COMPAT: HIGH';
+        matchBadge.style.borderColor = 'var(--success)';
+        matchBadge.style.color = 'var(--success)';
+        matchBadge.style.background = 'rgba(0,255,65,0.1)';
+      } else if (pct >= 50) {
+        scoreDescription.textContent = '>> STATUS: NEEDS OPTIMIZATION. Some ATS issues found.';
+        matchBadge.textContent = 'ATS COMPAT: MEDIUM';
+        matchBadge.style.borderColor = 'var(--warning)';
+        matchBadge.style.color = 'var(--warning)';
+        matchBadge.style.background = 'rgba(255,204,0,0.1)';
+      } else {
+        scoreDescription.textContent = '>> STATUS: CRITICAL. Major ATS compatibility issues.';
+        matchBadge.textContent = 'ATS COMPAT: LOW';
+        matchBadge.style.borderColor = 'var(--error)';
+        matchBadge.style.color = 'var(--error)';
+        matchBadge.style.background = 'rgba(255,0,60,0.1)';
+      }
+
+      // Update verdict for audit mode
+      const verdictEl = document.getElementById('atsVerdict');
+      verdictEl.textContent = `PARSE RISK: ${risk} (No JD - Standalone Audit)`;
+      if (risk === 'LOW') {
+        verdictEl.style.color = 'var(--success)';
+      } else if (risk === 'MEDIUM') {
+        verdictEl.style.color = 'var(--warning)';
+      } else {
+        verdictEl.style.color = 'var(--error)';
+      }
+    }
+
     // Update Resume ATS Audit panel
     function updateAudit(audit) {
       const card = document.getElementById('auditCard');
@@ -1141,18 +1203,21 @@
     uploadForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const formStatus = document.getElementById('formStatus');
+      const hasJD = document.getElementById('job_description').value.trim().length > 0;
 
-      // Validate
+      // Validate - only resume is required
       if (!resumeInput.files.length) {
         formStatus.innerHTML = '<span class="status-error">> ERROR: NO FILE INPUT PROTOCOL.</span>';
         return;
       }
-      if (!document.getElementById('job_description').value.trim()) {
-        formStatus.innerHTML = '<span class="status-error">> ERROR: MISSING PARAMETERS (JOB DESC).</span>';
-        return;
+
+      // Show info if no JD provided
+      if (!hasJD) {
+        formStatus.innerHTML = '<span style="color:var(--warning);">> INFO: No JD provided. Running resume-only ATS audit...</span>';
+      } else {
+        formStatus.innerHTML = '';
       }
 
-      formStatus.innerHTML = '';
       setLoading(true);
 
       try {
@@ -1173,41 +1238,78 @@
           throw new Error(errorMsg);
         }
 
-        if (!data || !data.ats_result) {
+        if (!data || !data.resume_audit) {
           throw new Error('NULL DATA RECEIVED.');
         }
 
+        const jdProvided = data.jd_provided;
         const atsResult = data.ats_result;
-        const resumeAudit = data.resume_audit;  // Standalone ATS audit
-        const parsed = parseAnalysisResult(atsResult);
+        const resumeAudit = data.resume_audit;  // Always present
 
-        // Update UI - Job Match Analysis
-        updateScore(parsed.score);
-        updateBreakdown(parsed.breakdown);
-        updateVerdict(parsed.verdict);
-
-        // Update UI - Resume ATS Audit (standalone)
+        // Update UI - Resume ATS Audit (ALWAYS runs)
         updateAudit(resumeAudit);
 
-        renderTags(matchingList, parsed.matching, 'matching');
-        matchingCount.textContent = `${parsed.matching.length}`;
+        if (jdProvided && atsResult) {
+          // Full analysis with JD matching
+          const parsed = parseAnalysisResult(atsResult);
 
-        renderTags(missingList, parsed.missing, 'missing');
-        missingCount.textContent = `${parsed.missing.length}`;
+          updateScore(parsed.score);
+          updateBreakdown(parsed.breakdown);
+          updateVerdict(parsed.verdict);
 
-        renderSuggestions(parsed.suggestions);
-        suggestCount.textContent = `${parsed.suggestions.length}`;
+          renderTags(matchingList, parsed.matching, 'matching');
+          matchingCount.textContent = `${parsed.matching.length}`;
 
-        // Show both results in raw
-        rawAnalysis.textContent = JSON.stringify({
-          job_match: atsResult,
-          resume_audit: resumeAudit
-        }, null, 2);
+          renderTags(missingList, parsed.missing, 'missing');
+          missingCount.textContent = `${parsed.missing.length}`;
 
-        formStatus.innerHTML = '<span class="status-success">> SUCCESS: DUAL ANALYSIS COMPLETE.</span>';
+          renderSuggestions(parsed.suggestions);
+          suggestCount.textContent = `${parsed.suggestions.length}`;
+
+          rawAnalysis.textContent = JSON.stringify({
+            job_match: atsResult,
+            resume_audit: resumeAudit
+          }, null, 2);
+
+          formStatus.innerHTML = '<span class="status-success">> SUCCESS: FULL ANALYSIS COMPLETE (Resume + JD Match).</span>';
+        } else {
+          // Resume-only mode - use audit score as primary
+          updateScoreFromAudit(resumeAudit);
+          document.getElementById('breakdownCard').style.display = 'none';
+
+          // Clear JD-related sections
+          matchingList.innerHTML = '<div class="empty-state">No JD provided - skipped</div>';
+          matchingCount.textContent = '—';
+          missingList.innerHTML = '<div class="empty-state">No JD provided - skipped</div>';
+          missingCount.textContent = '—';
+
+          // Show general suggestions from audit
+          const auditRecs = resumeAudit.recommendations || [];
+          renderSuggestions(auditRecs);
+          suggestCount.textContent = `${auditRecs.length}`;
+
+          rawAnalysis.textContent = JSON.stringify({
+            resume_audit: resumeAudit
+          }, null, 2);
+
+          formStatus.innerHTML = '<span class="status-success">> SUCCESS: RESUME AUDIT COMPLETE (No JD - standalone mode).</span>';
+        }
       } catch (err) {
         console.error(err);
-        formStatus.innerHTML = `<span class="status-error">> ERROR: ${err.message}</span>`;
+        let errorMessage = err.message;
+
+        // Provide helpful hints based on error type
+        if (errorMessage.includes('API key')) {
+          errorMessage += ' Contact the administrator to configure the API.';
+        } else if (errorMessage.includes('quota') || errorMessage.includes('429')) {
+          errorMessage = 'API rate limit reached. Please wait 1-2 minutes before trying again.';
+        } else if (errorMessage.includes('overloaded') || errorMessage.includes('503')) {
+          errorMessage = 'Server is busy. Please try again in a moment.';
+        } else if (errorMessage.includes('parse') || errorMessage.includes('JSON')) {
+          errorMessage = 'Analysis failed. Please try again with a different resume format.';
+        }
+
+        formStatus.innerHTML = `<span class="status-error">> ERROR: ${errorMessage}</span>`;
       } finally {
         setLoading(false);
       }
